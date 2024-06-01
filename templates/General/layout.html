@@ -1,0 +1,161 @@
+{% load static %}
+{% load i18n %}
+{% language 'id' %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <!--META TAGS-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="{% static "logo_toko.png" %}">
+    <!--PAGE TITLE-->
+    <title>Toko Harapan Jaya</title>
+
+    <!--JQUERY-->
+    <script src="{% static 'jQuery/code.jquery.com_jquery-3.7.0.js' %}"></script>
+
+    <!--BOOTSTRAP-->
+    <link href='{% static 'bootstrap/css/bootstrap.css' %}' rel="stylesheet">
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.js' %}"></script>
+
+    <!--DATATABLES-->
+    <link href='{% static 'datatables/datatables.css' %}' rel="stylesheet">
+    <script src="{% static 'datatables/datatables.js' %}"></script>
+
+    <!--JQUERY UI-->
+    <link href='{% static 'jQueryUI/jquery-ui.css' %}' rel="stylesheet">
+    <script src="{% static 'jQueryUI/jquery-ui.js' %}"></script>
+
+    <!--LOCAL STYLES.CSS-->
+    <link href='{% static 'styles.css' %}' rel="stylesheet">
+
+    <!--FONTAWESOME(ICONS)-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+</head>
+
+<body>
+{% if user.is_authenticated %}
+    {% include "General/header.html" %}
+{% endif %}
+<div class="container-fluid my-3" id="root">
+{% block content %} {% endblock %}
+</div>
+<div id="filler" style="background-color: transparent"></div>
+{% if user.is_authenticated %}
+    {% include "General/footer.html" %}
+{% endif %}
+</body>
+</html>
+
+<div class="modal fade" id="modal_template">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger btn-sm" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'scripts.js' %}"></script>
+{% if user.is_authenticated %}
+<script>
+    //FIXED VALUES AND ELEMENTS
+    const csrf_token = '{{ csrf_token|escapejs }}';
+    const root = $('#root');
+    const modal = $('#modal_template');
+
+    //URLS
+    const modal_urls = {
+        "modify_item": "{% url "Inventory:modify_item" %}",
+        "get_stack": "{% url "Inventory:get_stack" %}",
+        "modify_transaksi": "{% url "Sales:mofidy_transaksi" %}",
+        "get_transaksi": "{% url "Sales:get_transaksi" %}",
+        "get_barang_keluar": "{% url "Sales:get_barang_keluar" %}",
+        "modify_stack": "{% url "Inventory:modify_stack" %}",
+        "get_po": "{% url "Purchasing:get_po" %}",
+        "get_barang_masuk": "{% url "Purchasing:get_barang_masuk" %}",
+        "get_pengiriman": "{% url "Purchasing:get_pengiriman" %}",
+        "modify_po": "{% url "Purchasing:modify_po" %}",
+        "modify_pengiriman": "{% url "Purchasing:modify_pengiriman" %}",
+        "terima_pengiriman": "{% url "Purchasing:terima_pengiriman" %}",
+        "keluarkan_barang": "{% url "Sales:keluarkan_barang" %}",
+        "logout": "{% url "logout" %}",
+        "get_print_dialog": "{% url "Sales:get_print_dialog" %}",
+        "get_payment_dialog": "{% url "Inventory:get_payment_dialog" %}",
+    }
+    const page_urls = {
+        "dashboard": "{% url "dashboard" %}",
+        "inventory":"{% url 'Inventory:index' %}",
+        "stock_gudang":"{% url 'Inventory:stock_gudang' %}",
+        "sales":"{% url "Sales:index" %}",
+        "create_bill": "{% url "Sales:create_bill" %}",
+        "riwayat_keluar": "{% url "Sales:riwayat_barang_keluar" %}",
+        "purchasing": "{% url "Purchasing:index" %}",
+        "riwayat_masuk": "{% url "Purchasing:riwayat_barang_masuk" %}",
+        "riwayat_pengiriman": "{% url "Purchasing:riwayat_pengiriman" %}",
+        "admin_dashboard": "{% url "Management:index" %}",
+        "create_recap": "{% url "Inventory:create_recap" %}",
+    }
+    const util_urls = {
+        "get_item_list":"{% url "Inventory:get_item_list" %}",
+        "lunaskan":"{% url "Inventory:lunaskan" %}",
+        "selesaikan":"{% url "Inventory:selesaikan" %}",
+        "kembali_ke_draft":"{% url "Inventory:kembali_ke_draft" %}",
+    }
+
+    //GLOBAL VARIABLES
+    let popover_list = [], tooltip_list = [];
+    let item_list, new_list, list_stack, item_transaksi, item_po, item_pengiriman;
+    let current_dialog;
+    let current_page = 'dashboard';
+    let current_table;
+
+    const dt_settings = {
+        "scrollX": true,
+        "scrollY": true,
+        "autoWidth": true,
+        "searching": true,
+        "select": true,
+        "language": {
+            "info" : "_START_ - _END_ dari _TOTAL_",
+            "lengthMenu": "Tampilkan _MENU_",
+            "search": "Cari:",
+            "infoFiltered": "",
+            "infoEmpty": "",
+            "zeroRecords": "Data tidak ditemukan.",
+            "paginate": {
+                "sNext": "Setelah",
+                "sPrevious": "Sebelum",
+                "sLast": "Terakhir",
+                "sFirst": "Pertama"
+            }
+        },
+    };
+
+    const dt_min_settings = {
+        "scrollX": true,
+        "scrollY": true,
+        "autoWidth": true,
+        "select": true,
+        "info": false,
+        "paging": false,
+        "language": {
+            "search": "Cari:",
+            "infoFiltered": "",
+            "infoEmpty": "",
+            "zeroRecords": "Data tidak ditemukan.",
+        },
+    };
+</script>
+{% endif %}
+
+{% endlanguage %}

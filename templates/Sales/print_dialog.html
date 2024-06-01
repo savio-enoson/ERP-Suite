@@ -1,0 +1,58 @@
+{% load humanize %}
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Print Transaksi {{ transaksi }}
+            </h3>
+            <button type="button" class="btn btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="text-align: center">
+            <form class="form mx-auto" id="update_nominal_bayar">
+                <h3>Nominal Bayar</h3>
+                <h5>Total Harga Transaksi: Rp{{ harga_total|intcomma }}</h5>
+                <input type="hidden" id="id_transaksi" value="{{ transaksi.id }}">
+                <div class="input-group">
+                    <span class="input-group-text">Rp</span>
+                    <input type="number" class="form-control" name="nominal_bayar"
+                           id="nominal_bayar" min="0" step="500">
+                    <input class="btn btn-success" type="submit" value="Masukkan">
+                </div>
+            </form>
+            <hr>
+            <div class="row">
+                <div class="col-4">
+                    <button class="btn btn-primary" onclick="post_print_req('HJ-TR-001')">Kasir Toko</button>
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-primary" onclick="post_print_req('HJ-DM-001')">Kontan Toko</button>
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-primary" onclick="post_print_req('HJ-DM-002')">Kontan Kantor</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function post_print_req(printer_key) {
+        const id_transaksi = $('#id_transaksi').val()
+        let nominal_bayar = parseInt($('#nominal_bayar').val())
+        nominal_bayar = (isNaN(nominal_bayar)? 0 : nominal_bayar)
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Sales:post_print_req' %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                id_transaksi:id_transaksi, nominal_bayar:nominal_bayar, printer_key:printer_key
+            },
+            success: function (response) {
+                modal.modal('hide')
+            }
+        });
+    }
+</script>

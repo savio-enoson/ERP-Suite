@@ -1,0 +1,366 @@
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="modal-title">
+                    {% if purchase_order.id %}Ubah PO {{ purchase_order }}{% else %}Purchase Order Baru{% endif %}
+                </h3>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <!--FORM INPUT-->
+                <div class="col-md-12 col-lg-6 mb-2">
+                    <form id="penjual_form" class="input_form" onsubmit="post_po(event)">
+                        <div class="heading_container input_heading success">
+                            <h5>Masukkan Data PO</h5>
+                            <button tabindex="10" form="penjual_form" type="submit" class="btn btn-success">Simpan PO</button>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-md-4 col-sm-12">
+                                    <label>Penjual</label>
+                                    <input tabindex="1" type="text" class="form-control" list="list_penjual"
+                                       id="penjual" value="{{ purchase_order.penjual }}" maxlength="16"
+                                           autocomplete="off" required>
+                                    <datalist id="list_penjual">
+                                    {% for item in list_penjual %}
+                                        <option value="{{ item.penjual }}">
+                                    {% endfor %}
+                                    </datalist>
+                                </div>
+                                <div class="col-md-4 col-sm-12">
+                                    <label>Ekspedisi</label>
+                                    <input tabindex="2" class="form-control" list="list_ekspedisi"
+                                       id="ekspedisi" value="{{ purchase_order.ekspedisi }}" autocomplete="off">
+                                    <datalist id="list_ekspedisi">
+                                    {% for item in list_ekspedisi %}
+                                        <option value="{{ item.ekspedisi }}">
+                                    {% endfor %}
+                                    </datalist>
+                                </div>
+                                <div class="col-md-4 col-sm-12">
+                                    <label>No. Invoice</label>
+                                    <input tabindex="3" type="text" class="form-control" id="nomor_invoice"
+                                        value="{{ purchase_order.nomor_invoice }}" maxlength="16" autocomplete="off" required>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <div class="row mb-2">
+                                <div class="col-md-6 col-sm-12">
+                                    <label>Dibuat</label>
+                                    <input tabindex="4" type="date" class="form-control" id="tanggal"
+                                        value="{{ purchase_order.tanggal|date:'Y-m-d' }}" required>
+                                </div>
+                                <div class="col-md-6 col-sm-12">
+                                    <label>Jatuh Tempo</label>
+                                    <input tabindex="5" type="date" class="form-control" id="jatuh_tempo"
+                                        value="{{ purchase_order.jatuh_tempo|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label>Keterangan</label>
+                            <textarea class="form-control" id="keterangan_po" rows="1" maxlength="200">{{ purchase_order.keterangan|default_if_none:"" }}</textarea>
+                        </div>
+
+                        <input type="hidden" id="id_po" value="{{ purchase_order.id }}">
+                    </form>
+
+                    <br>
+
+                    <form id="item_form" class="input_form" onsubmit="tambah_barang(event)" autocomplete="off">
+                        <div class="heading_container input_heading primary">
+                            <h5>Masukkan Data Barang</h5>
+                            <div class="button_container">
+                                <button onclick="clear_inputs()" type="button" class="btn btn-dark"
+                                data-bs-title="Bersihkan input" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                                <i class="fa-solid fa-arrows-rotate"></i></button>
+                                <button tabindex="9" form="item_form" type="submit" class="btn btn-primary">Masukkan Barang</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label>Nama</label>
+                                    <input onkeyup="update_search()" tabindex="6" type="text" class="form-control" id="nama_barang" required>
+                                </div>
+                                <div class="col-3">
+                                    <label>Satuan</label>
+                                    <input type="text" class="form-control" id="satuan" readonly>
+                                </div>
+                                <div class="col-3">
+                                    <label>Stock</label>
+                                    <button id="cek_stock" onclick="check_stock()" type="button" class="btn btn-light form_query_button w-100">
+                                        <i class="fa-solid fa-magnifying-glass"></i><p class="d-none d-md-inline">&ensp;Cek Stock</p>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label>Jumlah</label>
+                                    <input tabindex="7" type="number" class="form-control" min="0" max="5000" id="jumlah" required>
+                                </div>
+                                <div class="col-6">
+                                    <label>Harga Satuan</label>
+                                    <div class="input-group">
+                                        <span style="border-top-right-radius: 0; border-bottom-right-radius: 0" class="input-group-text">Rp</span>
+                                        <input tabindex="8" type="number" class="form-control" id="harga" min="0" step="500" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label>Keterangan</label>
+                            <textarea class="form-control" id="keterangan_barang" rows="1"></textarea>
+                        </div>
+
+                        <input type="hidden" id="id_barang">
+                    </form>
+                </div>
+
+                <!--TABLE BARANG-->
+                <div class="col-md-12 col-lg-6 mt-5 mt-lg-0">
+                    <table id="nota" class="table table-striped table-bordered border-dark table-hover">
+                        <thead class="table-dark">
+                            <th>No</th>
+                            <th>Barang</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Harga Total</th>
+                            <th class="action_cell">Action</th>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <div style="text-align: right"><h3 id="grand_total"></h3></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            <button tabindex="9" form="penjual_form" type="submit" class="btn btn-success">Simpan PO</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        stock_queried = false
+        {% if item_po %}
+            item_po = JSON.parse('{{ item_po|safe }}')
+        {% endif %}
+        if (item_po == null) {
+            item_po = []
+        }
+
+        reload_nota()
+        update_search()
+    })
+
+    modal.one('hidden.bs.modal', function () {
+        if (item_po.length > 0){
+            if(!confirm("Simpan data?")){
+                item_po =[]
+            }
+        }
+    })
+
+    function update_search() {
+        let id = $("#id_barang")
+        let nama = $("#nama_barang")
+        let satuan = $("#satuan")
+        let harga = $("#harga")
+        let input = nama.val()
+
+        if (input == "") {
+            clear_inputs($('#item_form'))
+            return
+        }
+
+        let regex = new RegExp(input, 'i')
+        nama.autocomplete({
+            source: function(request, response) {
+                response(
+                    $.map(item_list.filter(item => regex.test(item.nama.replace(/\s/g, ''))), function (item) {
+                        return {
+                            label: item.label,
+                            value: item
+                        }
+                    })
+                )
+            },
+            delay: 250,
+            autoFocus: true,
+
+            focus: function (event, ui) {
+                event.preventDefault()
+            },
+
+            select: function (event, ui) {
+                event.preventDefault()
+                item = ui.item.value
+                nama.val(item.nama)
+                id.val(item.id)
+                satuan.val(item.satuan)
+                harga.val(item.modal)
+                reset_stock_btn()
+            },
+        }).bind('focus', function () {nama.autocomplete("search");});
+    }
+
+    function check_stock() {
+        const id_barang = $('#id_barang').val()
+        if (stock_queried) {return}
+        if (id_barang == null || id_barang == "") {
+            alert("Belum memilih barang.")
+            return
+        }
+        $.getJSON("{% url "Inventory:get_item_stock" %}", {id: id_barang}, function (response) {
+            $('#cek_stock').html(response.stock)
+            stock_queried = true
+        })
+    }
+
+    function clear_inputs(form = $('#item_form')) {
+        form.find('input').each(function () {
+            $(this).val(null)
+        })
+        reset_stock_btn()
+        $('#nama_barang').focus()
+        tooltip_list.forEach((e) => e.hide())
+    }
+
+    function reset_stock_btn() {
+        stock_queried = false
+        $('#cek_stock').html('<i class="fa-solid fa-magnifying-glass"></i><p class="d-none d-md-inline">&ensp;Cek Stock</p>')
+    }
+
+    function reload_nota() {
+        $('#nota tbody').empty();
+        if (item_po.length == 0) {
+            $('#nota > tbody:last-child').append('<tr><td class="action_cell" colspan="6">Tidak ada barang dalam Nota.</td></tr>'); return;
+        }
+        grand_total = 0
+
+        for (let i = 0; i < item_po.length; i++) {
+            item = item_po[i]
+            $('#nota > tbody:last-child').append(`
+            <tr class="${(i%2==0)? 'even' : 'odd'}">
+                <td>${i+1}</td>
+                <td>${item.nama}</td>
+                <td class="num">${item.jumlah}</td>
+                <td class="num">Rp ${item.harga.toLocaleString()}</td>
+                <td class="num">Rp ${item.harga_total.toLocaleString()}</td>
+                <td class="action_cell">
+                    <button onclick="hapus_barang(${i})" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                    ${(item.keterangan == "")? '' :
+                    `
+                    <button class="btn btn-primary btn-sm" data-bs-container="body" data-bs-toggle="popover"
+                    data-bs-placement="bottom" title="Keterangan" data-bs-content="${item.keterangan}">
+                    <i class="fa-solid fa-magnifying-glass"></i></button>
+                    `}
+                </td>
+            </tr>`);
+            grand_total += item.harga_total
+        }
+
+        $('#grand_total').html(`Grand Total&ensp;:&ensp;Rp ${grand_total.toLocaleString()}`)
+        init_popover(modal)
+    }
+
+    function hapus_barang(index) {
+        item_po.splice(index, 1)
+        reload_nota()
+    }
+
+    function tambah_barang() {
+        event.preventDefault();
+        const id = parseInt($('#id_barang').val())
+
+        if (isNaN(id)) {
+            alert("Belum memilih barang. Jika barang belum ada perlu didaftarkan dulu.")
+            return
+        }
+
+        const nama = `${$('#nama_barang').val()} (${$('#satuan').val()})`
+        const jumlah = parseInt($('#jumlah').val())
+        const harga = parseInt($('#harga').val())
+        const harga_total = jumlah * harga
+        const keterangan = $('#keterangan_barang').val()
+
+        const updating = false
+        const index = item_po.findIndex(item => item.id === id)
+        if (index != -1) {
+            current = item_po[index]
+
+            if (current.harga != harga) {
+                item_po.push({id:id ,nama:nama, jumlah:jumlah, harga:harga, harga_total:harga_total, keterangan:keterangan})
+            } else {
+                if (current.jumlah > jumlah) {
+                    current.jumlah = jumlah
+                } else {
+                    current.jumlah += jumlah
+                }
+
+                current.harga = harga
+                current.harga_total = current.jumlah * current.harga
+                current.keterangan = keterangan
+            }
+        } else {
+            item_po.push({id:id ,nama:nama, jumlah:jumlah, harga:harga, harga_total:harga_total, keterangan:keterangan})
+        }
+
+        reload_nota()
+        clear_inputs($('#item_form'))
+        $('#nama_barang').focus()
+    }
+
+    function post_po() {
+        event.preventDefault();
+        if (item_po.length == 0) {
+            alert("Belum memasukkan barang.")
+            return
+        }
+
+        const id_po = $('#id_po').val();
+        const penjual = $('#penjual').val();
+        const ekspedisi = $('#ekspedisi').val();
+        const nomor_invoice = $('#nomor_invoice').val();
+        const tanggal = $('#tanggal').val();
+        const jatuh_tempo = $('#jatuh_tempo').val();
+        const keterangan = $('#keterangan_po').val();
+
+        if (!confirm("Simpan PO ini?")) {return;}
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Purchasing:post_po' %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                id_po:id_po, penjual: penjual, ekspedisi: ekspedisi,
+                nomor_invoice:nomor_invoice, tanggal:tanggal, jatuh_tempo:jatuh_tempo,
+                keterangan:keterangan, item_po:JSON.stringify(item_po)
+            },
+            success: function (response) {
+                alert(response.message)
+                modal.modal('hide')
+            },
+            complete: function () {
+                item_po = []
+                get_page(current_page, true)
+            }
+        });
+        return false;
+    }
+</script>

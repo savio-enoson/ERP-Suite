@@ -1,0 +1,27 @@
+{% load humanize %}
+<div class="heading_container">
+    <h3>{{ header }}</h3>
+</div>
+<hr>
+<table class="table table-striped table-bordered border-dark table-hover w-100 dt_table">
+        <thead class="table-dark">
+            <th>No</th>
+            <th>Pelanggan</th>
+            <th>Tanggal<text class="min"> & Waktu</text></th>
+            <th class="min">Admin</th>
+            <th class="action_cell">Action</th>
+        </thead>
+        <tbody>
+            {%  for record in riwayat %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ record.transaksi.pelanggan }}</td>
+                    <td>{{ record.tanggal }}<text class="min">, {{ record.waktu }}</text></td>
+                    <td class="min">{{ record.admin.username }}</td>
+                    <td class="action_cell">
+                        <button onclick="get_modal('get_barang_keluar', {{ record.transaksi_id }}, 0)" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+</table>

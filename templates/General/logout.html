@@ -1,0 +1,66 @@
+{% load humanize %}
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+    <div class="modal-content">
+        <div class="modal-header">
+            <figure class="figure">
+                <h3 class="modal-title">
+                    Akhiri Sesi {{ session.date|date:'d F Y' }}
+                </h3>
+                <h5 style="color: var(--primary-color)">Start:&ensp;{{ session.start_time|time:'H:i' }}</h5>
+            </figure>
+            <button type="button" class="btn btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <form class="form m-0" id="logout_form" method="POST" action="{% url "end_session" %}">
+                <input type="hidden" id="session_id" name="session_id" value="{{ session.id }}">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" class="form-control" name="username" id="username" value="{{ session.admin.username }}" readonly>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col">
+                            <label>Jam Mulai</label>
+                            <input type="text" class="form-control" name="jam_mulai" id="jam_mulai"
+                                   value="{{ session.start_time }}" readonly>
+                        </div>
+                        <div class="col">
+                            <label>Jam Selesai</label>
+                            <input type="time" class="form-control" name="jam_selesai" id="jam_selesai"
+                                   value="{% now 'H:i' %}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-6">
+                            <label>Cash Diterima</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" name="cash_diterima" id="cash_diterima" step="500" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label>Cash Diambil</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" name="cash_diambil" id="cash_diambil" step="500" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Keterangan</label>
+                    <textarea class="form-control" name="keterangan" id="keterangan" rows="3"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            <button form="logout_form" type="submit" class="btn btn-success">Simpan</button>
+        </div>
+    </div>
+</div>

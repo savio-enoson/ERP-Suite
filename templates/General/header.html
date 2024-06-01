@@ -1,0 +1,99 @@
+<nav class="navbar navbar-expand-lg shadow p-0" id="header">
+    <div class="container-fluid nav_container heading_container">
+        <a class="navbar-brand">Dashboard</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#nav_main" aria-expanded="false" style="color: var(--light-primary-color)">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="nav_main">
+        <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
+            <li class="nav-item mx-3">
+                <a class="nav-link active btn" aria-current="page" onclick="get_page('dashboard')">Dashboard</a>
+            </li>
+            <li class="nav-item mx-3 dropdown">
+                <a class="nav-link dropdown-toggle" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">Inventory&nbsp;</a>
+                <ul class="dropdown-menu shadow">
+                    <li><a class="dropdown-item btn" onclick="get_page('inventory')">
+                        <span><i class="fa-solid fa-list"></i>&emsp;Daftar Barang</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn" onclick="get_page('stock_gudang')">
+                        <span><i class="fa-solid fa-warehouse"></i>&emsp;Stock Gudang</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn" onclick="get_page('create_recap')">
+                        <span><i class="fa-solid fa-clipboard-list"></i>&emsp;Buat Rekapan</span>
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item btn" onclick="get_modal('modify_item')">
+                        <span><i class="fa-solid fa-plus"></i>&emsp;Tambahkan Barang</span>
+                    </a></li>
+                </ul>
+            </li>
+            <li class="nav-item mx-3 dropdown">
+                <a class="nav-link dropdown-toggle" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">Sales&nbsp;</a>
+                <ul class="dropdown-menu shadow">
+                    <li><a class="dropdown-item btn" onclick="get_page('sales')">
+                        <span><i class="fa-solid fa-list"></i>&emsp;Riwayat Transaksi</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn" onclick="get_page('create_bill')">
+                        <span><i class="fa-solid fa-file-invoice"></i>&emsp;Buat Tagihan</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn" onclick="get_page('riwayat_keluar')">
+                        <span><i class="fa-solid fa-truck-arrow-right"></i>&emsp;Barang Keluar</span>
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item btn" onclick="get_modal('modify_transaksi')">
+                        <span><i class="fa-solid fa-plus"></i>&emsp;Tambahkan Transaksi</span>
+                    </a></li>
+                </ul>
+            </li>
+            <li class="nav-item mx-3 dropdown">
+                <a class="nav-link dropdown-toggle" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">Pembelian&nbsp;</a>
+                <ul class="dropdown-menu shadow">
+                    <li><a class="dropdown-item btn" onclick="get_page('purchasing')">
+                        <span><i class="fa-solid fa-list"></i>&emsp;Purchase Order</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn" onclick="get_page('riwayat_pengiriman')">
+                        <span><i class="fa-solid fa-truck"></i>&emsp;Pengiriman</span>
+                    </a></li>
+
+                    {# TODO:REKAPAN BIAYA EKSPEDISI #}
+                    <li><a class="dropdown-item btn visually-hidden">
+                        <span><i class="fa-solid fa-file-invoice-dollar"></i>&emsp;Hitung Tagihan</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn" onclick="get_page('riwayat_masuk')">
+                        <span><i class="fa-solid fa-truck-arrow-right flip"></i>&emsp;Barang Masuk</span>
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item btn" onclick="get_modal('modify_po')">
+                        <span><i class="fa-solid fa-plus"></i>&emsp;Tambahkan PO</span>
+                    </a></li>
+                </ul>
+            </li>
+            <li class="nav-item mx-3 dropdown">
+                <a class="nav-link dropdown-toggle" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">Admin&nbsp;</a>
+                <ul class="dropdown-menu shadow">
+                    <li><a class="dropdown-item btn" onclick="get_page('admin_dashboard')">
+                        <span><i class="fa-solid fa-laptop-file"></i>&emsp;Dashboard Admin</span>
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item btn">
+                        <span><i class="fa-solid fa-code-branch"></i>&emsp;Changelogs</span>
+                    </a></li>
+                    <li><a class="dropdown-item btn">
+                        <span><i class="fa-solid fa-chalkboard-user"></i>&emsp;Sessions</span>
+                    </a></li>
+                </ul>
+            </li>
+
+            {% if user.is_authenticated %}
+            <li class="nav-item ms-3 d-flex w-auto">
+                <a class="nav-link active btn" onclick="get_modal('logout')">Logout</a>
+            </li>
+            {% endif %}
+        </ul></div>
+    </div>
+</nav>

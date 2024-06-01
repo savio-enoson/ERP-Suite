@@ -1,0 +1,51 @@
+<h3>Buat Tagihan /  Rekapan Penjualan</h3>
+<hr>
+<form id="bill_form" class="form input_form mb-2" onsubmit="get_bill(event)">
+    <h5>Pelanggan</h5>
+    <div class="form-group mb-2">
+        <label class="form-label">Nama</label>
+        <input class="form-control" type="text" id="pelanggan" name="pelanggan"
+               placeholder="Nama pelanggan..." required>
+    </div>
+    <h5>Jangka Waktu Rekap</h5>
+    <div class="row">
+        <div class="col-sm-12 col-md-5 mb-2">
+            <div class="input-group">
+                <span class="input-group-text text-bg-dark">Mulai</span>
+                <input class="form-control" type="date" name="mulai" id="mulai" value="{{ default_start }}" required>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-5 mb-2">
+            <div class="input-group">
+                <span class="input-group-text text-bg-dark">Sampai</span>
+                <input class="form-control" type="date" name="sampai" id="sampai" value="{% now 'Y-m-d' %}" required>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-2 text-end">
+            <button type="submit" form="summary_form" class="btn btn-success" style="white-space: nowrap!important">Buat Rekapan</button>
+        </div>
+    </div>
+</form>
+<hr>
+<div id="recap_container"></div>
+
+<script>
+    function get_bill() {
+        event.preventDefault();
+
+        $.ajax({
+            type: "GET",
+            url: "{% url "Sales:get_bill" %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                pelanggan: $('#pelanggan').val(), mulai: $('#mulai').val(), sampai: $('#sampai').val()
+            },
+            success: function (response) {
+                $('#recap_container').html(response.content);
+            },
+            complete: function () {
+                location.href = "#recap_container";
+            }
+        })
+    }
+</script>

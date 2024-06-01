@@ -1,0 +1,73 @@
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Ubah {{ stack.item }} - {{ stack.gudang }}
+            </h3>
+            <button type="button" class="btn btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <form class="form m-0" id="modify_stack_form" onsubmit="post_stack(event)">
+                <h5>Data Barang</h5>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12 col-lg-8 mb-2">
+                            <label class="form-label">Barang</label>
+                            <input value="{{ stack.item }}" type="text" class="form-control" disabled>
+                        </div>
+                        <div class="col-md-12 col-lg-4 mb-2">
+                            <label class="form-label">Jumlah</label>
+                            <input value="{{ stack.jumlah }}" type="number" name="jumlah" id="jumlah"
+                               class="form-control" min="1">
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h5>Informasi Tambahan</h5>
+                <div class="form-group mb-3">
+                    <label class="form-label">Expired</label>
+                    <input value="{{ stack.expired|date:'Y-m-d' }}" type="date" name="expired" id="expired" class="form-control">
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">Keterangan</label>
+                    <textarea class="form-control" id="keterangan" name="keterangan" rows="2" maxlength="200">
+{% if stack.keterangan == "" or not stack.keterangan %}{% else %}{{ stack.keterangan }}{% endif %}</textarea>
+                </div>
+                <input type="hidden" id="id_stack" name="id_stack" value="{{ stack.id }}">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            <button form="modify_stack_form" type="submit" class="btn btn-success">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function post_stack() {
+        event.preventDefault();
+
+        const id_stack = $('#id_stack').val();
+        const jumlah = $('#jumlah').val();
+        const expired = $('#expired').val()
+        const keterangan = $('#keterangan').val();
+
+        if (!confirm("Simpan perubahan?")) {return;}
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Inventory:post_stack' %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                id_stack: id_stack, jumlah: jumlah, expired: expired, keterangan: keterangan
+            },
+            success: function (response) {
+                alert(response.message)
+                modal.modal('hide')
+            },
+            complete: function () {
+                get_page(current_page, true)
+            }
+        });
+        return false;
+    }
+</script>

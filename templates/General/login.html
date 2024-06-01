@@ -1,0 +1,31 @@
+{% extends "General/layout.html" %}
+{% load static %}
+
+{% block title %}<title>Login Page</title>{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3 d-flex align-items-center justify-content-center">
+
+    {% if message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    <form class="form input_form shadow border-dark border py-4 px-5" action="{% url 'login_verify' %}" method="POST"
+        style="background-color: var(--dark-color); color:var(--light-primary-color)">
+        {% csrf_token %}
+        <h3>Login</h3>
+        <hr>
+        <label>Username</label>
+        <input type="text" class="form-control" name="username">
+
+        <br>
+
+        <label>Password</label>
+        <input type="password" class="form-control" name="password">
+
+        <input style="margin-top:2rem" type="submit" class="btn btn-primary my-3" value="Log In">
+    </form>
+</div>
+{% endblock %}

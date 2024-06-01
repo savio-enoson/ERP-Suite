@@ -1,0 +1,117 @@
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                {% if item.id %}Ubah {{ item }}{% else %}Tambahkan Barang{% endif %}
+            </h3>
+            <button type="button" class="btn btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <form class="form m-0" id="modify_item_form" onsubmit="post_item(event)">
+                <h5>Data Barang</h5>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12 col-lg-8 mb-2">
+                            <label class="form-label">Nama</label>
+                            <input value="{{ item.nama }}" type="text" name="nama" id="nama"
+                                       class="form-control" maxlength="32" required>
+                        </div>
+                        <div class="col-md-12 col-lg-4 mb-2">
+                            <label class="form-label">Satuan</label>
+                            <input value="{{ item.satuan }}" type="text" name="satuan" id="satuan"
+                                       class="form-control" maxlength="12" required>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h5>Harga Barang</h5>
+                <div class="form-group mb-3">
+                    <div class="row">
+                        <div class="col-md-12 col-lg-4">
+                            <label class="form-label">Harga Jual</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Rp</span>
+                                <input value="{{ item.harga|cut:',' }}" type="number" name="harga" id="harga"
+                                       class="form-control" min="0" step="500" required>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-lg-4">
+                            <label class="form-label">Modal</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Rp</span>
+                                <input value="{{ item.modal|cut:',' }}" type="number" name="modal" id="modal"
+                                       class="form-control" min="0" step="500" required>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-lg-4">
+                            <label class="form-label">Ongkos Kirim</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Rp</span>
+                                <input value="{{ item.ongkos|cut:',' }}" type="number" name="ongkos" id="ongkos"
+                                       class="form-control" min="0" step="500" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h5>Informasi Tambahan</h5>
+                <div class="form-group mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Status</span>
+                        <select name="archived" id="archived" class="form-select form-control">
+                            <option value="0" {{ item.archived|yesno:"'', selected" }}>Aktif</option>
+                            <option value="1" {{ item.archived|yesno:"selected, ''" }}>Tidak Aktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">Keterangan</label>
+                    <textarea class="form-control" id="keterangan" name="keterangan" rows="2" maxlength="200">
+{% if item.keterangan == "" or not item.keterangan %}{% else %}{{ item.keterangan }}{% endif %}</textarea>
+                </div>
+                <input type="hidden" id="id_item" name="id_item" value="{{ item.id }}">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            <button form="modify_item_form" type="submit" class="btn btn-success">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function post_item() {
+        event.preventDefault();
+
+        const id_item = $('#id_item').val();
+        const nama = $('#nama').val();
+        const satuan = $('#satuan').val();
+        const harga = parseInt($('#harga').val());
+        const modal_harga = parseInt($('#modal').val());
+        const ongkos = parseInt($('#ongkos').val());
+        const archived = $('#archived').val();
+        const keterangan = $('#keterangan').val();
+        const text = (id_item == "")? `Tambahkan ${nama}?` : `Ubah data ${nama}?`;
+
+        if (!confirm(text)) {return;}
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Inventory:post_item' %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                id_item:id_item, nama:nama, satuan:satuan,
+                harga:harga, modal:modal_harga, ongkos:ongkos,
+                archived:archived, keterangan:keterangan
+            },
+            success: function (response) {
+                alert(response.message)
+                modal.modal('hide')
+            },
+            complete: function () {
+                get_page(current_page, true)
+                init_item_list()
+            }
+        });
+        return false;
+    }
+</script>

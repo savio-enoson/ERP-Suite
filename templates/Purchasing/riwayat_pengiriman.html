@@ -1,0 +1,40 @@
+{% load humanize %}
+<div class="heading_container">
+    <h3>{{ header }}</h3>
+</div>
+<hr>
+<table class="table table-striped table-bordered border-dark table-hover w-100 dt_table">
+    <thead class="table-dark">
+        <th>No</th>
+        <th>Penjual</th>
+        <th>Ekspedisi</th>
+        <th>No Invoice</th>
+        <th>Tanggal</th>
+        <th class="action_cell">Action</th>
+    </thead>
+    <tbody>
+    {%  for record in list_pengiriman %}
+        <tr ondblclick="get_modal('get_po', {{ record.id }})"
+            oncontextmenu="get_modal('get_po', {{ record.id }})">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ record.purchase_order.penjual }}</td>
+            <td>{{ record.purchase_order.ekspedisi }}</td>
+            <td>{{ record.purchase_order.nomor_invoice }}</td>
+            <td>{{ record.tanggal }}</td>
+            <td class="action_cell">
+                <button onclick="get_modal('get_pengiriman', {{ record.purchase_order.id }})" class="btn btn-dark btn-sm"
+                data-bs-title="Lihat daftar Pengiriman" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                <i class="fa-solid fa-list"></i></button>
+
+                <button onclick="get_modal('modify_pengiriman', {{ record.id }}, 1)"
+                class="btn btn-outline-dark btn-sm" data-bs-title="Ubah pengiriman" data-bs-toggle="tooltip"
+                data-bs-placement="bottom"><i class="fa-solid fa-file-pen"></i></button>
+
+                <button onclick="get_modal('terima_pengiriman', {{ record.id }})"
+                class="btn btn-success btn-sm" data-bs-title="Terima pengiriman" data-bs-toggle="tooltip"
+                data-bs-placement="bottom"><i class="fa-solid fa-truck-arrow-right flip"></i></button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

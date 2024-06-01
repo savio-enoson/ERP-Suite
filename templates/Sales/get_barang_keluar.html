@@ -1,0 +1,61 @@
+{% load humanize %}
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable
+            modal-fullscreen-md-down modal-xl">
+    <div class="modal-content">
+        <div class="modal-header heading_container">
+            <div class="modal-title">
+                <h3>Barang Keluar</h3>
+                <h5>{{ header }}</h5>
+            </div>
+
+            <div class="button_container">
+                {% if type == '1' %}
+                    <button onclick="get_modal('get_barang_keluar', {{ id }}, 0)" class="btn btn-dark"><i class="fa-solid fa-arrows-up-down"></i>&ensp;Semua</button>
+                {% endif %}
+                <button onclick="get_modal('get_transaksi', {{ id }})" class="btn btn-light"><i class="fa-solid fa-share flip"></i>&ensp;Ke Transaksi</button>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="row p-2">
+                <table class="table table-striped table-bordered border-dark table-hover w-100">
+                {% if type == '1' %}
+                    <p style="font-style: italic">* Tidak menampilkan semua. Click tombol diatas untuk mengubah.</p>
+                {% endif %}
+                    <thead class="table-dark">
+                        <tr>
+                            <th rowspan="2">Tanggal & Waktu</th>
+                            <th rowspan="2">Barang</th>
+                            <th rowspan="2">Gudang</th>
+                            <th colspan="2" class="action_cell">Jumlah</th>
+                        </tr>
+                        <tr>
+                            <th class="action_cell">Nota</th>
+                            <th class="action_cell">Keluar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in item_keluar %}
+                        <tr>
+                            <td colspan="5" class="fw-bold">{{ i.record.tanggal }}, {{ i.record.waktu }} | Admin: {{ i.record.admin.username }}</td>
+                        </tr>
+                        {% for j in i.items %}
+                            <tr>
+                                <td></td>
+                                <td>{{ j.item_parent }}</td>
+                                <td>{{ j.gudang.nama }}</td>
+                                <td class="num">{{ j.item.jumlah|intcomma }}</td>
+                                <td class="num">{{ j.jumlah|intcomma }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% empty %}
+                        <tr class="action_cell"><td colspan="6">Tidak ada barang.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+        </div>
+    </div>
+</div>

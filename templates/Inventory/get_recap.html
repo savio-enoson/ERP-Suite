@@ -1,0 +1,606 @@
+{% load static %}
+{% load humanize %}
+
+<!--HEADER-->
+<div class="heading_container" id="recap_heading">
+    <h3>
+        Rekapitulasi {{ timeframe }}
+        <br>
+        <small>Terima Tunai:&ensp;Rp {{ tunai|intcomma }}&ensp;|
+        &ensp;Terima Transfer:&ensp;Rp {{ transfer|intcomma }}</small>
+    </h3>
+    <div class="button_container">
+        <button class="btn btn-danger" onclick="save_pdf()"><i class="fa-regular fa-file-pdf"></i>&ensp;Buat PDF</button>
+        <a href="#session_heading" class="btn btn-primary">Sesi Admin</a>
+        <a href="#transaksi_heading" class="btn btn-light">Transaksi</a>
+        <a href="#masuk_heading" class="btn btn-secondary">Barang Masuk</a>
+        <a href="#keluar_heading" class="btn btn-dark">Barang Keluar</a>
+    </div>
+</div>
+
+<!--DAFTAR STOCK & SESI ADMIN-->
+<div class="row">
+    <div class="col-md-12 col-lg-6">
+        <!--ADMIN SESSION-->
+        {% if list_session %}
+        <hr>
+        <h3>Daftar Sesi Admin</h3>
+        <table class="table table-striped table-bordered border-dark table-hover w-100">
+            <thead class="table-dark">
+                <th>No</th>
+                <th>Admin</th>
+                <th>Tanggal</th>
+                <th>Waktu</th>
+                <th class="num">Cash Diterima</th>
+                <th class="num">Cash Diambil</th>
+                <th>Keterangan</th>
+            </thead>
+            <tbody>
+                {% for row in list_session %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.admin.username }}</td>
+                        <td>{{ row.date|date:'d M' }}</td>
+                        <td>{{ row.start_time|time:'H:i' }} - {{ row.end_time|time:'H:i' }}</td>
+                        <td class="num">Rp {{ row.cash_received|intcomma }}</td>
+                        <td class="num">Rp {{ row.cash_taken|intcomma }}</td>
+                        <td>{{ row.keterangan|default_if_none:'-' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    <div class="col-md-12 col-lg-6">
+        <!--STOCK RENDAH-->
+        {% if flagged_items %}
+        <hr>
+        <h3>Stock Rendah</h3>
+        <table class="table table-striped table-bordered border-dark table-hover w-100">
+            <thead class="table-dark">
+                <th>No</th>
+                <th>Barang</th>
+                <th class="num">Stock</th>
+                <th class="num">Demand</th>
+            </thead>
+            <tbody>
+                {% for row in flagged_items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.nama }}</td>
+                        <td class="num">{{ row.stock }}</td>
+                        <td class="num">{{ row.demand }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+
+<!--TRANSAKSI-->
+{% if list_transaksi %}
+<hr>
+<div class="heading_container" id="transaksi_heading">
+    <h3>
+        Daftar Transaksi
+        <br>
+        <small>Total:&ensp;Rp {{ total_value_tr|intcomma }}</small>
+    </h3>
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rincian_transaksi"
+        aria-expanded="true" aria-controls="rincian_transaksi" onclick="scroll_to('rincian_transaksi')">
+        <i class="fa-solid fa-list"></i>&ensp;Rincian Transaksi
+    </button>
+</div>
+
+<table class="table table-striped table-bordered border-dark table-hover w-100 dt_table">
+    <thead class="table-dark">
+        <th>No</th>
+        <th>Pelanggan</th>
+        <th>Tanggal & Waktu</th>
+        <th class="min">Pembayaran</th>
+        <th class="min num">Harga Total</th>
+        <th>Status</th>
+        <th class="action_cell">Action</th>
+    </thead>
+    <tbody>
+        {% for record, item, status, harga_total in list_transaksi %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.pelanggan }}</td>
+                <td>{{ record.tanggal|date:'d M' }}, {{ record.waktu|time:'H:i' }}</td>
+                <td class="min">
+                    {{ record.pembayaran }}
+                    {% if record.metode_pembayaran %}
+                    <br>
+                    <span class="text-nowrap small">{{ record.metode_pembayaran }}, {{ record.tanggal_pembayaran }}</span>
+                    {% endif %}
+                </td>
+                <td class="min num">Rp {{ harga_total|intcomma }}</td>
+                <td class="action_cell"><text class="status_box {{ status.color }}">{{ status.text }}</text></td>
+                <td class="action_cell">
+                    <button onclick="get_modal('get_transaksi', {{ record.id }})" class="btn btn-primary btn-sm"
+                    data-bs-title="Detail transaksi" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                    <i class="fa-solid fa-magnifying-glass"></i></button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="collapse" id="rincian_transaksi">
+    <div class="heading_container mt-3">
+        <h3>Rincian Transaksi</h3>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rincian_transaksi"
+            aria-expanded="false" aria-controls="rincian_transaksi">
+            Tutup Rincian
+        </button>
+    </div>
+    <hr>
+    {% for row, items, status, harga in list_transaksi %}
+        <div class="heading_container mt-3">
+            <figure class="figure">
+                <h5 class="modal-title">{{ row }}</h5>
+                <h5>Pembayaran: {{ row.pembayaran }}</h5>
+                <text class="status_box large {{ status.color }}">{{ status.text }}</text>
+                <figcaption class="figure-caption mt-2">{{ row.keterangan|default_if_none:"" }}</figcaption>
+            </figure>
+            <button onclick="get_modal('get_barang_keluar', {{ row.id }}, 0)" class="btn btn-light"><i class="fa-solid fa-list"></i>&ensp;Barang Keluar</button>
+        </div>
+
+        <table class="table table-striped table-bordered border-dark table-hover w-100">
+            <thead class="table-dark">
+                <th>No</th>
+                <th>Barang</th>
+                <th class="num">Jumlah</th>
+                <th class="num">Harga</th>
+                <th class="num">Total</th>
+                {% if ada_keterangan %}
+                <th>Info</th>
+                {% endif %}
+            </thead>
+            <tbody>
+            {% for item in items %}
+                {% widthratio item.harga 1 item.jumlah as harga_total %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.item }}</td>
+                    <td class="num">{{ item.jumlah|intcomma }} {{ item.satuan }}</td>
+                    <td class="num">Rp {{ item.harga|intcomma }}</td>
+                    <td class="num">Rp {{ harga_total|intcomma }}</td>
+                    {% if ada_keterangan %}
+                        <td class="action_cell">
+                            {% if item.keterangan %}
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="popover" title="Keterangan"
+                                data-bs-placement="bottom" data-bs-content="{{ item.keterangan }}">
+                                <i class="fa-solid fa-magnifying-glass"></i></button>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% empty %}
+                <tr class="action_cell"><td colspan="6">Tidak ada barang.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div style="text-align: right"><h5>Grand Total: Rp {{ harga|intcomma }}</h5></div>
+        {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<!--BARANG MASUK-->
+{% if list_masuk %}
+<hr>
+<div class="heading_container" id="masuk_heading">
+    <h3>Daftar Barang Masuk</h3>
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rincian_barang_masuk"
+        aria-expanded="true" aria-controls="rincian_barang_masuk" onclick="scroll_to('rincian_barang_masuk')">
+        <i class="fa-solid fa-list"></i>&ensp;Rincian Barang Masuk
+    </button>
+</div>
+
+<table class="table table-striped table-bordered border-dark table-hover w-100 dt_table">
+    <thead class="table-dark">
+        <th>No</th>
+        <th>Pengiriman</th>
+        <th>Tanggal<text class="min"> & Waktu</text></th>
+        <th class="min">Admin</th>
+        <th class="action_cell">Action</th>
+    </thead>
+    <tbody>
+        {%  for record, items in list_masuk %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.pengiriman }}</td>
+                <td>{{ record.tanggal|date:'d M' }}<text class="min">, {{ record.waktu|time:'H:i' }}</text></td>
+                <td class="min">{{ record.admin.username }}</td>
+                <td class="action_cell">
+                    <button onclick="get_modal('get_barang_masuk', {{ record.pengiriman_id }}, 2)" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="collapse" id="rincian_barang_masuk">
+    <div class="heading_container mt-3">
+        <h3>Rincian Barang Masuk</h3>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rincian_barang_masuk"
+            aria-expanded="false" aria-controls="rincian_barang_masuk">
+            Tutup Rincian
+        </button>
+    </div>
+    <hr>
+    {% for row, items in list_masuk %}
+        <div class="heading_container mt-3">
+            <figure class="figure">
+                <h5 class="modal-title">PO:&ensp;{{ row.pengiriman.purchase_order }}</h5>
+                <h5>Pengiriman:&ensp;{{ row.pengiriman.tanggal }} <i class="fa-solid fa-arrow-right"></i> {{ row.pengiriman.tanggal_sampai }}</h5>
+                <figcaption class="figure-caption mt-2">Diterima Pada:&ensp;{{ row.tanggal|date:'d M' }}, {{ row.waktu|time:'H:i' }}</figcaption>
+            </figure>
+            <button onclick="get_modal('get_pengiriman', {{ row.pengiriman.purchase_order.id }})" class="btn btn-light"><i class="fa-solid fa-list"></i>&ensp;Pengiriman</button>
+        </div>
+
+        <table class="table table-striped table-bordered border-dark table-hover w-100">
+            <thead class="table-dark">
+                <th>Barang</th>
+                <th>Gudang</th>
+                <th class="action_cell">Nota</th>
+                <th class="action_cell">Masuk</th>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.item_parent }}</td>
+                        <td>{{ item.gudang }}</td>
+                        <td class="num">{{ item.item.jumlah|intcomma }}</td>
+                        <td class="num">{{ item.jumlah|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<!--BARANG KELUAR-->
+{% if list_keluar %}
+<hr>
+<div class="heading_container" id="keluar_heading">
+    <h3>Daftar Barang Keluar</h3>
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rincian_barang_keluar"
+        aria-expanded="true" aria-controls="rincian_barang_keluar" onclick="scroll_to('rincian_barang_keluar')">
+        <i class="fa-solid fa-list"></i>&ensp;Rincian Barang Keluar
+    </button>
+</div>
+
+<table class="table table-striped table-bordered border-dark table-hover w-100 dt_table">
+    <thead class="table-dark">
+        <th>No</th>
+        <th>Pelanggan</th>
+        <th>Tanggal<text class="min"> & Waktu</text></th>
+        <th class="min">Admin</th>
+        <th class="action_cell">Action</th>
+    </thead>
+    <tbody>
+        {%  for record, items in list_keluar %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.transaksi.pelanggan }}</td>
+                <td>{{ record.tanggal|date:'d M' }}<text class="min">, {{ record.waktu|time:'H:i' }}</text></td>
+                <td class="min">{{ record.admin.username }}</td>
+                <td class="action_cell">
+                    <button onclick="get_modal('get_barang_keluar', {{ record.transaksi_id }}, 0)" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="collapse" id="rincian_barang_keluar">
+    <div class="heading_container mt-3">
+        <h3>Rincian Barang Keluar</h3>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rincian_barang_keluar"
+            aria-expanded="false" aria-controls="rincian_barang_keluar">
+            Tutup Rincian
+        </button>
+    </div>
+    <hr>
+    {% for row, items in list_keluar %}
+        <div class="heading_container mt-3">
+            <figure class="figure">
+                <h5 class="modal-title">Transaksi:&ensp;{{ row.transaksi }}</h5>
+                <figcaption class="figure-caption mt-2">Dikeluarkan Pada:&ensp;{{ row.tanggal|date:'d M' }}, {{ row.waktu|time:'H:i' }}</figcaption>
+            </figure>
+            <button onclick="get_modal('get_transaksi', {{ row.transaksi.id }})" class="btn btn-light"><i class="fa-solid fa-list"></i>&ensp;Transaksi</button>
+        </div>
+
+        <table class="table table-striped table-bordered border-dark table-hover w-100">
+            <thead class="table-dark">
+                <th>Barang</th>
+                <th>Gudang</th>
+                <th class="action_cell">Nota</th>
+                <th class="action_cell">Keluar</th>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.item_parent }}</td>
+                        <td>{{ item.gudang }}</td>
+                        <td class="num">{{ item.item.jumlah|intcomma }}</td>
+                        <td class="num">{{ item.jumlah|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<!--PRINTABLE VERSION-->
+<div class="container-fluid" id="print_div">
+    <h3>
+        Rekapitulasi {{ timeframe }}
+        <br>
+        <small>Terima Tunai:&ensp;Rp {{ tunai|intcomma }}&ensp;|
+        &ensp;Terima Transfer:&ensp;Rp {{ transfer|intcomma }}</small>
+    </h3>
+
+
+    <!--DAFTAR STOCK & SESI ADMIN-->
+    <div class="row">
+        <div class="col-md-12 col-lg-6">
+            <!--ADMIN SESSION-->
+            {% if list_session %}
+            <hr>
+            <h5>Daftar Sesi Admin</h5>
+            <table id="tabel_session" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <th>No</th>
+                    <th>Admin</th>
+                    <th>Tanggal</th>
+                    <th>Waktu</th>
+                    <th class="num">Cash Diterima</th>
+                    <th class="num">Cash Diambil</th>
+                    <th>Keterangan</th>
+                </thead>
+                <tbody>
+                    {% for row in list_session %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ row.admin.username }}</td>
+                            <td>{{ row.date|date:'d M' }}</td>
+                            <td>{{ row.start_time|time:'H:i' }} - {{ row.end_time|time:'H:i' }}</td>
+                            <td class="num">Rp {{ row.cash_received|intcomma }}</td>
+                            <td class="num">Rp {{ row.cash_taken|intcomma }}</td>
+                            <td>{{ row.keterangan|default_if_none:'-' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        <div class="col-md-12 col-lg-6">
+            <!--STOCK RENDAH-->
+            {% if flagged_items %}
+            <hr>
+            <h5>Stock Rendah</h5>
+            <table id="tabel_stock" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <th>No</th>
+                    <th>Barang</th>
+                    <th class="num">Stock</th>
+                    <th class="num">Demand</th>
+                </thead>
+                <tbody>
+                    {% for row in flagged_items %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ row.nama }}</td>
+                            <td class="num">{{ row.stock }}</td>
+                            <td class="num">{{ row.demand }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <!--TRANSAKSI-->
+    {% if list_transaksi %}
+    <hr>
+    <div class="row">
+        <div class="col-8">
+            <h5>Daftar Transaksi&ensp;|&ensp;
+                Total: Rp {{ total_value_tr|intcomma }}</h5>
+            <table id="tabel_transaksi" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pelanggan</th>
+                        <th>Waktu</th>
+                        <th>Pembayaran</th>
+                        <th class="num">Harga</th>
+                        <th>Status</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record, item, status, harga_total in list_transaksi %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ record.pelanggan }}</td>
+                            <td>{{ record.tanggal|date:'d M' }}, {{ record.waktu|time:'H:i' }}</td>
+                            <td class="min">
+                                {{ record.pembayaran }}
+                                {% if record.metode_pembayaran %}
+                                <br>
+                                <span class="small">{{ record.metode_pembayaran }}, {{ record.tanggal_pembayaran }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="num">Rp {{ harga_total|intcomma }}</td>
+                            <td>{{ status.text }}</td>
+                            <td>{{ record.keterangan|default_if_none:"-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-4">
+            <h5>Barang Terjual</h5>
+            <table id="tabel_item_tr" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Barang</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in item_terjual %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.nama }}</td>
+                        <td>{{ row.jumlah|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!--BARANG MASUK-->
+    {% if list_masuk %}
+    <hr>
+    <div class="row">
+        <div class="col-6">
+            <h5>Daftar Barang Masuk</h5>
+            <table id="tabel_masuk" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pengiriman</th>
+                        <th>Tanggal & Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%  for record, items in list_masuk %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ record.pengiriman }}</td>
+                            <td>{{ record.tanggal }}, {{ record.waktu }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-6">
+            <h5>Rincian Barang Masuk</h5>
+            <table id="tabel_item_msk" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Barang</th>
+                        <th>Gudang</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in item_masuk %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.nama }}</td>
+                        <td>{{ row.gudang }}</td>
+                        <td>{{ row.jumlah|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!--BARANG KELUAR-->
+    {% if list_keluar %}
+    <hr>
+    <div class="row">
+        <div class="col-6">
+            <h5>Daftar Barang Keluar</h5>
+            <table id="tabel_keluar" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pelanggan</th>
+                        <th>Tanggal & Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%  for record, items in list_keluar %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ record.transaksi.pelanggan }}</td>
+                            <td>{{ record.tanggal }}, {{ record.waktu }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-6">
+            <h5>Rincian Barang Keluar</h5>
+            <table id="tabel_item_msk" class="table table-bordered border-dark table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Barang</th>
+                        <th>Gudang</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in item_keluar %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.nama }}</td>
+                        <td>{{ row.gudang }}</td>
+                        <td>{{ row.jumlah|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="{% static 'html2pdf/html2pdf.bundle.js' %}"></script>
+<script>
+    $(function () {
+
+    });
+
+    function scroll_to(element) {
+        $(`#${element}`).get(0).scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+
+     function save_pdf() {
+        const element = document.getElementById('print_div');
+
+        const pdfOptions = {
+            margin: [.25, .25, .25, .25],
+            filename: 'Rekapitulasi {{ timeframe }}.pdf',
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Use html2pdf with additional parameters
+        html2pdf(element, pdfOptions);
+    }
+</script>

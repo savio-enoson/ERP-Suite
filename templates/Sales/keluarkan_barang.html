@@ -1,0 +1,227 @@
+{% load humanize %}
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+    <div class="modal-content">
+        <div class="modal-header heading_container">
+            <figure class="figure">
+                <h3 class="modal-title">
+                    Kelurkan barang untuk {{ transaksi }}
+                </h3>
+                <h5 style="color: var(--primary-color)">
+                    Transaksi: {{ transaksi.pelanggan }}, {{ transaksi.tanggal }} | Pembayaran: {{ transaksi.pembayaran }}</h5>
+                <figcaption class="figure-caption mt-2" style="color: var(--light-primary-color)">{{ pengiriman.keterangan|default_if_none:"" }}</figcaption>
+            </figure>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12 col-lg-8 mb-2">
+                    <div class="heading_container input_heading success mb-2">
+                        <h5>Barang dalam Transaksi</h5>
+                        <input type="hidden" value="{{ transaksi.id }}" id="id_transaksi">
+                        <button onclick="post_barang_keluar()" type="button" class="btn btn-success">Simpan</button>
+                    </div>
+                    <table class="table table-striped table-bordered border-dark table-hover w-100">
+                        <thead class="table-dark">
+                            <th>No</th>
+                            <th>Barang</th>
+                            <th>Gudang</th>
+                            <th>Jumlah</th>
+                            <th>Keluar</th>
+                            <th>Keterangan</th>
+                            <th class="action_cell">Action</th>
+                        </thead>
+                        <tbody>
+                            {% for item, list in item_transaksi %}
+                            <tr id="form-{{ item.id }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.nama }}</td>
+                                <td class="input_cell">
+                                    <select class="form-control form-select" id="gudang">
+                                        <option value=""></option>
+                                        {% for gudang in list %}
+                                            <option value="{{ gudang.id }}">{{ gudang.nama }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="num">{{ item.jumlah|intcomma }}</td>
+                                <td class="input_cell">
+                                    <input id="jumlah" class="form-control" type="number" min="0" value="{{ item.jumlah }}">
+                                </td>
+                                <td class="input_cell">
+                                    <textarea id="keterangan" class="form-control " rows="1" maxlength="200"></textarea>
+                                </td>
+                                <td class="action_cell">
+                                    <button onclick="tambahkan_barang({{ item.id }}, {{ item.parent_id }})" type="button" class="btn btn-success btn-sm">
+                                    <i class="fa-solid fa-plus"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-12 col-lg-4 mt-5 mt-lg-0">
+                    <h5>Barang Keluar</h5>
+                    <table id="nota" class="table table-striped table-bordered border-dark table-hover w-100">
+                        <thead class="table-dark">
+                            <th>Barang</th>
+                            <th>Gudang</th>
+                            <th>Jumlah</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody>
+                            <tr><td style="text-align: center" colspan="5">Belum ada barang keluar.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+            <button onclick="post_barang_keluar()" type="button" class="btn btn-success">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        item_keluar = []
+
+        map_gudang = {
+        {% for gudang in list_gudang %}
+            {{ gudang.id }}:'{{ gudang.nama }}',
+        {% endfor %}
+        }
+
+        map_barang = {
+        {% for item in list_item %}
+            {{ item.id }}:['{{ item.item }}', {{ item.jumlah }}],
+        {% endfor %}
+        }
+    })
+
+    modal.one('hidden.bs.modal', function () {
+        if (item_keluar.length > 0){
+            if(!confirm("Simpan data?")){
+                item_keluar =[]
+            }
+        }
+    })
+
+    function validate_input(id, id_parent, jumlah, gudang_id) {
+        if (gudang_id==="" || isNaN(jumlah)) {
+            alert("Data barang tidak valid. Tolong diperiksa lagi.")
+            return false
+        }
+
+        const sum_jumlah = item_keluar.reduce(function (sum, current) {
+            if (current.item_parent_id === id_parent) {
+                return sum + current.jumlah
+            } else {
+                return sum;
+            }
+        }, 0);
+
+        if (jumlah + sum_jumlah > map_barang[id][1]) {
+            alert("Jumlah keluar melebihi jumlah transaksi.")
+            return false
+        }
+
+        return true
+    }
+
+    function tambahkan_barang(id, id_parent) {
+        const parent = $(`#form-${id}`)
+        let values = []
+
+        parent.find('td.input_cell .form-control').each(function() {
+            values.push($(this).val())
+        })
+
+        const keterangan = values.pop();
+        const jumlah = parseInt(values.pop());
+        const gudang_id = values.pop()
+
+        if (!validate_input(id, id_parent, jumlah, gudang_id)) {return}
+
+        item_keluar.push({
+            keterangan:keterangan,
+            jumlah:jumlah,
+            gudang_id:gudang_id,
+            item_parent_id:id_parent,
+            item_id:id
+        })
+
+        parent.find('td.input_cell .form-control').each(function() {
+            if ($(this).attr('type') === 'number') {
+                $(this).val(0)
+            } else {
+                $(this).val('')
+            }
+        })
+        parent.find('td.input_cell .form-control:first').focus()
+        reload_table()
+    }
+
+    function hapus_barang(index) {
+        item_keluar.splice(index, 1)
+        reload_table()
+    }
+
+    function reload_table() {
+        $('#nota tbody').empty();
+        if (item_keluar.length == 0) {
+            $('#nota > tbody:last-child').append('<tr><td class="action_cell" colspan="5">Belum ada barang masuk.</td></tr>'); return;
+        }
+
+        for (let i = 0; i < item_keluar.length; i++) {
+            item = item_keluar[i]
+            $('#nota > tbody:last-child').append(`
+            <tr class="${(i%2==0)? 'even' : 'odd'}">
+
+                <td>${map_barang[item.item_id][0]}</td>
+                <td>${map_gudang[item.gudang_id]}</td>
+                <td class="num">${item.jumlah.toLocaleString()}</td>
+                <td class="action_cell">
+                    <button onclick="hapus_barang(${i})" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                    ${(item.keterangan == "")? '' :
+                    `
+                    <button class="btn btn-primary btn-sm" data-bs-container="body" data-bs-toggle="popover"
+                    data-bs-placement="bottom" title="Keterangan" data-bs-content="${item.keterangan}">
+                    <i class="fa-solid fa-magnifying-glass"></i></button>
+                    `}
+                </td>
+            </tr>`);
+        }
+        init_popover(modal)
+    }
+
+    function post_barang_keluar() {
+        event.preventDefault();
+        if (item_keluar.length == 0) {
+            alert("Belum memasukkan barang.");
+            return;
+        }
+
+        const id_transaksi = $('#id_transaksi').val()
+
+        if (!confirm("Simpan catatan barang keluar?")) {return;}
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Sales:post_barang_keluar' %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                id_transaksi:id_transaksi, item_keluar:JSON.stringify(item_keluar)
+            },
+            success: function (response) {
+                alert(response.message)
+                modal.modal('hide')
+            },
+            complete: function () {
+                item_keluar = []
+                get_page(current_page, true)
+            }
+        });
+        return false;
+    }
+</script>

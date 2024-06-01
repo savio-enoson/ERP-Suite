@@ -1,0 +1,66 @@
+{% load humanize %}
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable
+            modal-fullscreen-md-down modal-xl">
+    <div class="modal-content">
+        <div class="modal-header heading_container">
+            <div class="modal-title">
+                <h3>Barang Masuk</h3>
+                <h5>{{ header }}</h5>
+            </div>
+
+            <div class="button_container">
+                {% if type != '0' %}
+                    <button onclick="get_modal('get_barang_masuk', {{ id }}, 0)" class="btn btn-dark"><i class="fa-solid fa-arrows-up-down"></i>&ensp;Semua</button>
+                {% endif %}
+                <button onclick="get_modal('get_po', {{ id }})" class="btn btn-light"><i class="fa-solid fa-share flip"></i>&ensp;Ke PO</button>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="row p-2">
+                <table class="table table-striped table-bordered border-dark table-hover w-100">
+                {% if type != '0' %}
+                    <p style="font-style: italic">* Tidak menampilkan semua. Click tombol diatas untuk mengubah.</p>
+                {% endif %}
+                    <thead class="table-dark">
+                        <tr>
+                            <th colspan="3" class="action_cell">Pengiriman</th>
+                            <th colspan="3" class="action_cell">Jumlah</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2">Berangkat <i class="fa-solid fa-arrow-right"></i> Sampai</th>
+                            <th>Barang</th>
+                            <th>Gudang</th>
+                            <th class="action_cell">Nota</th>
+                            <th class="action_cell">Masuk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in list_pengiriman %}
+                        <tr>
+                            <td colspan="2" class="fw-bold">{{ i.record.tanggal }}
+                                <i class="fa-solid fa-arrow-right"></i>
+                                {% if i.record.tanggal_sampai %}{{ i.record.tanggal_sampai }}{% else %}Belum Sampai{% endif %}
+                            </td>
+                            <td colspan="4"></td>
+                        </tr>
+                        {% for j in i.items %}
+                            <tr>
+                                <td colspan="2"></td>
+                                <td>{{ j.nama }}</td>
+                                <td>{{ j.gudang }}</td>
+                                <td class="num">{{ j.jumlah|intcomma }}</td>
+                                <td class="num">{{ j.diterima|intcomma }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% empty %}
+                        <tr class="action_cell"><td colspan="6">Tidak ada barang.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,258 @@
+:root {
+    --primary-color: #DEDEDE;
+    --dark-color: #113350;
+    --text-color: #1F1F1F;
+    --light-primary-color: #eeeeee;
+    --highlight-color: rgba(149, 193, 255, 0.75);
+    --footer-height: 190px;
+    --header-height: 80px;
+}
+
+.form-control, textarea {
+    background-color: var(--light-primary-color);
+}
+
+td.input_cell {
+    padding: 7.5px 5px 0 5px;
+}
+
+td input.form-control {
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flip {
+    transform: scaleX(-1)
+}
+
+.subtext {
+    color: darkblue;
+    font-style: italic;
+    font-weight: bolder;
+}
+
+.blue {
+    background-color: var(--bs-primary) !important;
+}
+.green {
+    background-color: var(--bs-success) !important;
+}
+.gray {
+    background-color: var(--bs-secondary) !important;
+}
+.yellow {
+    background-color: darkorange !important;
+}
+.red {
+    background-color: var(--bs-danger) !important;
+}
+
+.status_box {
+    height: 30px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    color: whitesmoke;
+}
+
+.ui-autocomplete {
+    position: fixed !important;
+    z-index: 1060 !important;
+}
+
+.btn-light.form_query_button {
+    background-color: var(--light-primary-color);
+    border-color: #ced4da;
+}
+
+.edit_button {
+    transition: 250ms;
+    background-color: var(--light-primary-color);
+    border: 1px solid black;
+}
+
+.edit_button:hover {
+    background-color: whitesmoke;
+    box-shadow: 0px 0px 7.5px var(--bs-gray);
+}
+
+.modal-body, .modal-footer {
+    background-color: var(--primary-color);
+    border-color: rgba(0, 0, 0, 0.30);
+}
+
+.modal-body table {
+    background-color: var(--light-primary-color) !important;
+}
+
+.input_heading.success {
+    border-color: var(--bs-green) !important;
+}
+
+.input_heading.primary {
+    border-color: var(--bs-blue) !important;
+}
+
+.heading_container.input_heading {
+    margin-bottom: .5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid;
+}
+
+.heading_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header {
+    color: aliceblue;
+    background-color: var(--dark-color);
+}
+
+.input_form {
+    border-radius: 15px;
+    border-color: var(--text-color);
+    border-width: 1px;
+    background-color: transparent;
+}
+
+.button_container {
+    text-align: end;
+}
+
+.button_container button, .button_container a {
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+}
+
+tr.odd {
+    background-color: #d2d8de !important;
+}
+
+.paginate_button.active a {
+    background-color: var(--highlight-color) !important;
+    font-weight: bold;
+    color: var(--text-color) !important;
+}
+
+.paginate_button a:not(.disabled) {
+    color: var(--text-color);
+}
+
+.dataTables_wrapper label,  .dataTables_wrapper .row{
+    margin-bottom: 4px;
+    margin-top: 4px;
+}
+
+.min {
+    display: none;
+}
+
+td.num, th.num {
+    white-space: nowrap;
+    text-align: right;
+}
+
+th {
+    font-size: large;
+    background-color: var(--bs-gray-dark);
+}
+
+tbody tr:hover {
+    background-color: var(--highlight-color) !important;
+    box-shadow: 1.5px 2.5px;
+    transform: scale(1,1);
+    font-weight: bold;
+}
+
+.action_cell {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.action_cell button {
+    max-height: 30px;
+    aspect-ratio: 1/1;
+    margin-bottom: 2.5px;
+    margin-top: 2.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-outline-dark {
+    background-color: var(--light-primary-color);
+    color: var(--text-color);
+    border: 1px solid var(--bs-gray-dark);
+    transition: 250ms;
+}
+
+.btn-outline-dark:hover {
+    background-color: var(--text-color);
+    color: var(--light-primary-color);
+}
+
+.segment_container {
+    border-radius: 15px;
+    background-color: var(--primary-color);
+}
+
+.nav_container {
+    background-color: var(--dark-color);
+    padding: 1.5rem 1rem 1.5rem 1rem;
+    color: var(--light-primary-color);
+}
+
+.nav_container .navbar-brand {
+    font-weight: bolder;
+    font-size: 1.5rem;
+    color: var(--light-primary-color);
+    margin-right: 3rem;
+}
+
+.nav_container .nav-item a.active {
+    color: whitesmoke;
+    border: 0;
+}
+
+.nav_container .nav-item a {
+    color: var(--primary-color);
+    transition: 150ms;
+    width: fit-content;
+}
+
+.nav_container .nav-item a:hover {
+    background-color: transparent;
+    text-shadow: 0px 0px 2px white;
+    color: white;
+    transform: scale(1.1, 1.1);
+}
+
+.dropdown-menu {
+    background-color: var(--dark-color);
+    border-color: var(--light-primary-color);
+
+}
+
+.dropdown-divider {
+    border-color: var(--light-primary-color);
+}
+
+body {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+#print_div * {
+    font-size: x-small !important;
+}
+
+#print_div h3 {
+    font-size: large !important;
+}

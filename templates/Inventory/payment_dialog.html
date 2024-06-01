@@ -1,0 +1,21 @@
+{% load humanize %}
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Pembayaran {{ transaksi }}
+            </h3>
+            <button type="button" class="btn btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="text-align: center">
+            <h3>Metode Pembayaran</h3>
+            <div class="container d-flex justify-content-center">
+                <button class="btn btn-success mx-3" onclick="ubah_status({{ transaksi.id }}, 0, 0, 'Tunai')">Tunai</button>
+                <button class="btn btn-primary mx-3" onclick="ubah_status({{ transaksi.id }}, 0, 0, 'Transfer')">Transfer</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+        </div>
+    </div>
+</div>

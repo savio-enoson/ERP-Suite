@@ -1,0 +1,51 @@
+{% load static %}
+<h3>Buat Rekapan Inventory</h3>
+<hr>
+<form id="summary_form" class="form input_form mb-2" onsubmit="get_recap(event)">
+    <h5>Jangka Waktu Rekap</h5>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-sm-12 col-md-5">
+                <div class="input-group mb-2">
+                    <span class="input-group-text text-bg-dark">Mulai</span>
+                    <input class="form-control" type="date" name="mulai" id="mulai" value="{% now 'Y-m-d' %}" required>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-5 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text text-bg-dark">Sampai</span>
+                    <input class="form-control" type="date" name="sampai" id="sampai">
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-2 text-end">
+                <button type="submit" form="summary_form" class="btn btn-success" style="white-space: nowrap!important">Buat Rekapan</button>
+            </div>
+        </div>
+    </div>
+</form>
+<hr>
+<div id="recap_container"></div>
+
+
+<script>
+    const container = $('#recap_container');
+
+    function get_recap() {
+        event.preventDefault();
+
+        $.ajax({
+            type: "GET",
+            url: "{% url "Inventory:get_recap" %}",
+            headers: {'X-CSRFToken': csrf_token},
+            data: {
+                mulai: $('#mulai').val(), sampai: $('#sampai').val()
+            },
+            success: function (response) {
+                $('#recap_container').html(response.content);
+            },
+            complete: function () {
+                refactor_screen()
+            }
+        })
+    }
+</script>
